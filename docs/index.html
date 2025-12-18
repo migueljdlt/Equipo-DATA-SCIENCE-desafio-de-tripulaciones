@@ -97,7 +97,7 @@
 <li>Acceso a base de datos PostgreSQL</li>
 </ul>
 <h3>1. Clonar repositorio</h3>
-<pre class="prettyprint source lang-bash"><code>git clone https://github.com/migueljdlt/Archivo-Desaf-o-DATA-SCIENCE.git
+<pre class="prettyprint source lang-bash"><code>git clone https://github.com/migueljdlt/Equipo-DATA-SCIENCE-desafio-de-tripulaciones
 cd Archivo-Desaf-o-DATA-SCIENCE
 </code></pre>
 <h3>2. Configurar variables de entorno</h3>
@@ -105,10 +105,8 @@ cd Archivo-Desaf-o-DATA-SCIENCE
 <pre class="prettyprint source lang-bash"><code>cp .env.example .env
 </code></pre>
 <p>Edita <code>.env</code> con tus valores:</p>
-<pre class="prettyprint source lang-env"><code>PORT=3001
+<pre class="prettyprint source lang-env"><code>
 DATABASE_URL=postgresql://usuario:password@host:5432/database
-OLLAMA_URL=http://localhost:11434
-OLLAMA_MODEL=qwen3:8b
 </code></pre>
 <h3>3. Instalar dependencias Node.js</h3>
 <pre class="prettyprint source lang-bash"><code>npm install --legacy-peer-deps
@@ -250,7 +248,6 @@ if result['grafica_base64']:
 <pre class="prettyprint source"><code>Archivo-Desaf-o-DATA-SCIENCE/
 │
 ├── .env                      # Variables de entorno (NO SUBIR)
-├── .env.example             # Template de variables
 ├── .gitignore               # Archivos ignorados por Git
 ├── package.json             # Dependencias Node.js
 ├── requirements.txt         # Dependencias Python
@@ -341,7 +338,7 @@ ollama list
 <h3>Objetivos del proyecto</h3>
 <ul>
 <li>✅ Aplicar conocimientos de bases de datos SQL</li>
-<li>✅ Integrar IA (LLMs) para procesamiento de lenguaje natural</li>
+<li>✅ Integrar IA (LLMs + MCPS) para procesamiento de lenguaje natural</li>
 <li>✅ Crear APIs REST profesionales</li>
 <li>✅ Generar visualizaciones dinámicas</li>
 <li>✅ Trabajo en equipo multidisciplinar</li>
@@ -360,7 +357,6 @@ ollama list
 <li>✅ Validación estricta de SQL (solo SELECT)</li>
 <li>✅ Prevención de inyección SQL</li>
 <li>✅ CORS configurado correctamente</li>
-<li>✅ Timeout en peticiones</li>
 </ul>
 <h2>🚀 Próximas mejoras</h2>
 <ul>
@@ -383,10 +379,10 @@ ollama list
 <li>Abre un Pull Request</li>
 </ol>
 <h2>👤 Autores</h2>
-<p><strong>Miguel de la Torre, Luna Pérez Troncoso, Álvaro Martínez, Rosenila Vega, Jose Vila, Juan Pablo Rizzi, Alejandro Cerro </strong></p>
+<p><strong>Miguel de la Torre, Luna Pérez Troncoso, Álvaro Martínez, Rosinela Vega, Jose Vila, Juan Pablo Rizzi, Alejandro Cerro </strong></p>
 <ul>
 <li>GitHub: <a href="https://github.com/migueljdlt">@migueljdlt</a></li>
-<li>Proyecto: <a href="https://github.com/migueljdlt/Archivo-Desaf-o-DATA-SCIENCE">Archivo-Desaf-o-DATA-SCIENCE</a></li>
+<li>Proyecto: <a href="https://github.com/migueljdlt/Equipo-DATA-SCIENCE-desafio-de-tripulaciones">Equipo-DATA-SCIENCE-desafio-de-tripulaciones</a></li>
 </ul>
 <h2>📝 Licencia</h2>
 <p>Este proyecto es de código abierto bajo la licencia MIT.</p>
@@ -395,7 +391,6 @@ ollama list
 <li><strong>TheBridge</strong> - Por el bootcamp y el desafío</li>
 <li><strong>Anthropic</strong> - Por el protocolo MCP</li>
 <li><strong>Ollama</strong> - Por facilitar el uso de LLMs locales</li>
-<li><strong>Compañeros de bootcamp</strong> - Por la colaboración</li>
 </ul>
 <hr>
 <p>⭐ Si este proyecto te fue útil, considera darle una estrella en GitHub</p></article>

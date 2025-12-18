@@ -1,6 +1,6 @@
 # Chatbot SQL + Charts 📊
 
-Sistema de chatbot conversacional para consultas SQL con generación automática de gráficos usando IA.
+Sistema inteligente de chatbot conversacional que permite realizar consultas a bases de datos mediante lenguaje natural, generando automáticamente código SQL optimizado y visualizaciones de datos en tiempo real. Utiliza modelos de inteligencia artificial (LLM) para interpretar preguntas complejas, ejecutar consultas en PostgreSQL (mediante MCP) y crear gráficos dinámicos en formato base64, facilitando el análisis de datos sin necesidad de conocimientos técnicos en SQL o programación.
 
 ## 🚀 Características
 
@@ -11,6 +11,67 @@ Sistema de chatbot conversacional para consultas SQL con generación automática
 - **Base de datos real**: PostgreSQL en Render
 - **Sistema de aprendizaje**: Cache de consultas exitosas para mejorar generación SQL
 - **Glosarios matemáticos**: Soporte para operaciones matemáticas complejas (porcentajes, promedios, rankings)
+
+
+## 🏗️ Estructura del proyecto
+```
+Equipo-DATA-SCIENCE-desafio-de-tripulaciones/
+│
+├── .env                      # Variables de entorno (NO SUBIR)
+├── .env.example             # Template de variables
+├── .gitignore               # Archivos ignorados por Git
+├── package.json             # Dependencias Node.js
+├── requirements.txt         # Dependencias Python
+├── server.js                # Punto de entrada Node.js
+├── README.md                # Este archivo
+│
+├── src/                     # Backend Node.js
+│   ├── config/
+│   │   ├── constants.js     # Schema, glosarios, tipos
+│   │   ├── database.js      # Config PostgreSQL
+│   │   └── ollama.js        # Config Ollama
+│   │
+│   ├── services/
+│   │   ├── mcpClient.js     # Cliente MCP PostgreSQL
+│   │   ├── ollamaService.js # Servicio Ollama
+│   │   └── sqlService.js    # Generación y formateo SQL
+│   │
+│   ├── charts/
+│   │   ├── chartGenerator.js # Generador de gráficos
+│   │   └── chartUtils.js     # Utilidades gráficos
+│   │
+│   ├── routes/
+│   │   ├── index.js         # Router principal
+│   │   ├── queryRoutes.js   # Rutas de consultas
+│   │   ├── chartRoutes.js   # Rutas de gráficos
+│   │   └── infoRoutes.js    # Info y metadata
+│   │
+│   ├── utils/
+│   │   ├── sqlValidator.js  # Validación SQL
+│   │   ├── dataFormatter.js # Formateo datos
+│   │   └── helpers.js       # Funciones auxiliares
+│   │
+│   └── app.js               # App Express principal
+│
+└── Flask_API/               # API Flask
+    ├── config/
+    │   └── settings.py      # Configuración Flask
+    │
+    ├── routes/
+    │   ├── chat.py          # Endpoint principal
+    │   ├── health.py        # Health checks
+    │   └── metadata.py      # Schema y ejemplos
+    │
+    ├── services/
+    │   └── mcp_client.py    # Cliente Node.js
+    │
+    ├── utils/
+    │   ├── formatter.py     # Formato de respuestas
+    │   └── session.py       # Gestión de sesiones
+    │
+    └── app.py               # App Flask principal
+```
+
 
 ## 🛠️ Tecnologías
 
@@ -49,8 +110,8 @@ Sistema de chatbot conversacional para consultas SQL con generación automática
 
 ### 1. Clonar repositorio
 ```bash
-git clone https://github.com/migueljdlt/Archivo-Desaf-o-DATA-SCIENCE.git
-cd Archivo-Desaf-o-DATA-SCIENCE
+git clone https://github.com/migueljdlt/Equipo-DATA-SCIENCE-desafio-de-tripulaciones
+cd Equipo-DATA-SCIENCE-desafio-de-tripulaciones
 ```
 
 ### 2. Configurar variables de entorno
@@ -61,10 +122,7 @@ cp .env.example .env
 
 Edita `.env` con tus valores:
 ```env
-PORT=3001
 DATABASE_URL=postgresql://usuario:password@host:5432/database
-OLLAMA_URL=http://localhost:11434
-OLLAMA_MODEL=qwen3:8b
 ```
 
 ### 3. Instalar dependencias Node.js
@@ -168,8 +226,7 @@ if result['grafica_base64']:
     base64_str = result['grafica_base64'].split(',')[1]
     image_data = base64.b64decode(base64_str)
     image = Image.open(BytesIO(image_data))
-    image.save('grafico.png')
-    print("✅ Gráfico guardado como 'grafico.png'")
+    
 ```
 
 ## 📡 Endpoints
@@ -238,65 +295,6 @@ El chatbot entiende lenguaje natural:
 ✅ "Participación porcentual de cada región"
 ✅ "Gráfico de líneas de ventas por mes"
 ✅ "Top 10% de productos más vendidos"
-```
-
-## 🏗️ Estructura del proyecto
-```
-Archivo-Desaf-o-DATA-SCIENCE/
-│
-├── .env                      # Variables de entorno (NO SUBIR)
-├── .env.example             # Template de variables
-├── .gitignore               # Archivos ignorados por Git
-├── package.json             # Dependencias Node.js
-├── requirements.txt         # Dependencias Python
-├── server.js                # Punto de entrada Node.js
-├── README.md                # Este archivo
-│
-├── src/                     # Backend Node.js
-│   ├── config/
-│   │   ├── constants.js     # Schema, glosarios, tipos
-│   │   ├── database.js      # Config PostgreSQL
-│   │   └── ollama.js        # Config Ollama
-│   │
-│   ├── services/
-│   │   ├── mcpClient.js     # Cliente MCP PostgreSQL
-│   │   ├── ollamaService.js # Servicio Ollama
-│   │   └── sqlService.js    # Generación y formateo SQL
-│   │
-│   ├── charts/
-│   │   ├── chartGenerator.js # Generador de gráficos
-│   │   └── chartUtils.js     # Utilidades gráficos
-│   │
-│   ├── routes/
-│   │   ├── index.js         # Router principal
-│   │   ├── queryRoutes.js   # Rutas de consultas
-│   │   ├── chartRoutes.js   # Rutas de gráficos
-│   │   └── infoRoutes.js    # Info y metadata
-│   │
-│   ├── utils/
-│   │   ├── sqlValidator.js  # Validación SQL
-│   │   ├── dataFormatter.js # Formateo datos
-│   │   └── helpers.js       # Funciones auxiliares
-│   │
-│   └── app.js               # App Express principal
-│
-└── Flask_API/               # API Flask
-    ├── config/
-    │   └── settings.py      # Configuración Flask
-    │
-    ├── routes/
-    │   ├── chat.py          # Endpoint principal
-    │   ├── health.py        # Health checks
-    │   └── metadata.py      # Schema y ejemplos
-    │
-    ├── services/
-    │   └── mcp_client.py    # Cliente Node.js
-    │
-    ├── utils/
-    │   ├── formatter.py     # Formato de respuestas
-    │   └── session.py       # Gestión de sesiones
-    │
-    └── app.py               # App Flask principal
 ```
 
 ## 🔧 Troubleshooting
@@ -385,11 +383,12 @@ Las contribuciones son bienvenidas. Por favor:
 4. Push a la rama (`git push origin feature/AmazingFeature`)
 5. Abre un Pull Request
 
-## 👤 Autor
+## 👤 Autores
+- [Miguel de la Torre](https://github.com/migueljdlt), [Luna Pérez Troncoso](https://github.com/LunaPerezT), [Álvaro Martínez](https://github.com/Alvaro-mval), [Rosenila Vega](https://github.com/Rosinela-v), [Jose Vila](https://github.com/joseevila), [Juan Pablo Rizzi](https://github.com/rizzijp), [Alejandro Cerro](https://github.com/alc98)
 
-**Miguel de la Torre**
-- GitHub: [@migueljdlt](https://github.com/migueljdlt)
-- Proyecto: [Archivo-Desaf-o-DATA-SCIENCE](https://github.com/migueljdlt/Archivo-Desaf-o-DATA-SCIENCE)
+- Proyecto (Data Science): [Equipo-DATA-SCIENCE-desafio-de-tripulaciones](https://github.com/migueljdlt/Equipo-DATA-SCIENCE-desafio-de-tripulaciones)
+- Proyecto (Full Stack): [https://github.com/carlgomezro-spec/desafio-tripulaciones.git]
+- Proyecto (Ciberseguridad): [https://github.com/Davott17/Desafio-Tripulaciones-Ciberseguridad]
 
 ## 📝 Licencia
 
@@ -400,7 +399,6 @@ Este proyecto es de código abierto bajo la licencia MIT.
 - **TheBridge** - Por el bootcamp y el desafío
 - **Anthropic** - Por el protocolo MCP
 - **Ollama** - Por facilitar el uso de LLMs locales
-- **Compañeros de bootcamp** - Por la colaboración
 
 ---
 
