@@ -1,0 +1,58 @@
+cat > .dockerignore << 'EOF'
+# Node
+node_modules/
+npm-debug.log
+package-lock.json
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+venv_flask/
+.venv/
+venv/
+*.egg-info/
+dist/
+build/
+
+# Entorno
+.env.local
+.env.*.local
+
+# Git
+.git/
+.gitignore
+.github/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Datos
+data/
+*.log
+
+# Jupyter
+*.ipynb
+.ipynb_checkpoints/
+
+# Tests
+test_*.py
+grafico_test.png
+atacar api.ipynb
+
+# Docker
+Dockerfile.old
+docker-compose.old.yml
+
+# README
+*.md
+EOF

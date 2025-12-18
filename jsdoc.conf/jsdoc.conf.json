@@ -1,0 +1,17 @@
+{
+  "source": {
+    "include": ["server.js", "src"],
+    "includePattern": ".+\\.js(doc|x)?$",
+    "excludePattern": "(^|\\/|\\\\)(node_modules|__pycache__|venv|venv_flask|logs|data|Flask_API)($|\\/|\\\\)"
+  },
+  "opts": {
+    "destination": "./docs",
+    "recurse": true,
+    "readme": "./README.md"
+  },
+  "templates": {
+    "cleverLinks": true,
+    "monospaceLinks": false
+  },
+  "plugins": ["plugins/markdown"]
+}

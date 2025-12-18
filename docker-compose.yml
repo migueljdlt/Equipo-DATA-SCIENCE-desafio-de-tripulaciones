@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  chatbot-complete:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: chatbot-sql-complete
+    
+    # ========================================
+    # CONFIGURACIÓN GPU - SECCIÓN CRÍTICA
+    # ========================================
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all  # Usa todas las GPUs disponibles
+              capabilities: [gpu]
+    
+    # ========================================
+    # CONFIGURACIÓN DE PUERTOS
+    # ========================================
+    ports:
+      - "3001:3001"   # Node.js API
+      - "5000:5000"   # Flask API
+      - "11434:11434" # Ollama
+    
+    # ========================================
+    # VARIABLES DE ENTORNO
+    # ========================================
+    environment:
+      - PORT=3001
+      - DATABASE_URL=${DATABASE_URL}
+      - OLLAMA_URL=http://localhost:11434
+      - OLLAMA_MODEL=qwen3:8b
+      - NODE_ENV=production
+      - PYTHONUNBUFFERED=1
+      # Variables GPU
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+    
+    env_file:
+      - .env
+    
+    # ========================================
+    # VOLÚMENES
+    # ========================================
+    volumes:
+      - ollama-data:/root/.ollama
+      - ./logs:/app/logs
+    
+    # ========================================
+    # CONFIGURACIÓN DE RED Y REINICIO
+    # ========================================
+    restart: unless-stopped
+    networks:
+      - chatbot-network
+
+volumes:
+  ollama-data:
+    driver: local
+
+networks:
+  chatbot-network:
+    driver: bridge

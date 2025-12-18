@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: src/routes/queryRoutes.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: src/routes/queryRoutes.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * Rutas de consultas SQL
+ */
+
+const express = require('express');
+const { generarSQL, formatearRespuesta, guardarEjemploAprendido } = require('../services/sqlService');
+const { validarSQL, limpiarSQL } = require('../utils/sqlValidator');
+const { detectarPeticionGrafico, detectarTipoGrafico } = require('../utils/helpers');
+const { prepararDatosParaGrafico } = require('../utils/dataFormatter');
+const { generarGraficaBase64 } = require('../charts/chartGenerator');
+
+const router = express.Router();
+
+function crearQueryRoutes(mcp) {
+    router.post('/query', async (req, res) => {
+        const { pregunta, usuario_id = 'anonimo', rol = 'ventas' } = req.body;
+        
+        const resultado = {
+            exito: false,
+            tipo: 'texto',
+            mensaje: '',
+            datos: [],
+            columnas: [],
+            sql_generado: null,
+            grafico: null,
+            usuario_id,
+            rol
+        };
+        
+        try {
+            console.log(`\n>> Pregunta: ${pregunta}`);
+            
+            const quiereGrafico = detectarPeticionGrafico(pregunta);
+            const tipoGrafico = quiereGrafico ? detectarTipoGrafico(pregunta) : null;
+            
+            if (quiereGrafico) {
+                console.log(`>> Grafico solicitado: ${tipoGrafico}`);
+            }
+            
+            // Generar SQL
+            console.log('>> Generando SQL...');
+            let sql = await generarSQL(pregunta);
+            sql = limpiarSQL(sql);
+            resultado.sql_generado = sql;
+            console.log(`>> SQL: ${sql}`);
+            
+            // Validar
+            const validacion = validarSQL(sql);
+            if (!validacion.valido) {
+                resultado.mensaje = `SQL rechazado: ${validacion.mensaje}`;
+                return res.json(resultado);
+            }
+            
+            // Ejecutar
+            console.log('>> Ejecutando query...');
+            const respuesta = await mcp.query(sql);
+            
+            if (!respuesta.exito) {
+                resultado.mensaje = `Error: ${respuesta.error}`;
+                return res.json(resultado);
+            }
+            
+            const datos = respuesta.datos;
+            resultado.datos = datos;
+            
+            if (Array.isArray(datos) &amp;&amp; datos.length > 0) {
+                resultado.columnas = Object.keys(datos[0]);
+            }
+            
+            // Generar grafico si se pidio
+            if (quiereGrafico &amp;&amp; Array.isArray(datos) &amp;&amp; datos.length > 0) {
+                console.log(`>> Generando grafico tipo: ${tipoGrafico}`);
+    
+                try {
+                    const datosGrafico = prepararDatosParaGrafico(datos, tipoGrafico);
+                    console.log('>> Datos preparados para grafico:', JSON.stringify(datosGrafico, null, 2));
+        
+                    if (datosGrafico.length === 0) {
+                        console.log('⚠️  No hay datos para generar grafico');
+                        resultado.grafico = { tipo: tipoGrafico, error: 'No hay datos para visualizar' };
+                    } else {
+                        const base64Image = await generarGraficaBase64(tipoGrafico, datosGrafico);
+            
+                        if (base64Image) {
+                            resultado.grafico = {
+                                tipo: tipoGrafico,
+                                base64: base64Image
+                            };
+                            resultado.tipo = 'grafico';
+                            console.log(`✅ Grafico generado exitosamente (${base64Image.length} caracteres)`);
+                        } else {
+                            console.log('❌ generarGraficaBase64 retornó null');
+                            resultado.grafico = { tipo: tipoGrafico, error: 'Error generando imagen' };
+                        }
+                    }
+                } catch (chartError) {
+                    console.error('❌ Error en generación de grafico:', chartError);
+                    resultado.grafico = { error: chartError.message };
+                }
+            }
+            
+            // Formatear respuesta
+            console.log('>> Formateando respuesta...');
+            const mensaje = await formatearRespuesta(pregunta, datos);
+            
+            if (resultado.tipo !== 'grafico') {
+                if (datos.length === 1 &amp;&amp; resultado.columnas.length === 1) {
+                    resultado.tipo = 'numero';
+                } else if (datos.length > 1) {
+                    resultado.tipo = 'tabla';
+                }
+            }
+            
+            resultado.exito = true;
+            if (resultado.exito &amp;&amp; datos.length > 0) {
+                guardarEjemploAprendido(pregunta, sql);
+            }
+
+            resultado.mensaje = mensaje;
+            
+            console.log('>> OK');
+            res.json(resultado);
+            
+        } catch (error) {
+            console.error('>> Error:', error.message);
+            resultado.mensaje = `Error: ${error.message}`;
+            res.json(resultado);
+        }
+    });
+
+    return router;
+}
+
+module.exports = crearQueryRoutes;</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#DB_CONFIG">DB_CONFIG</a></li><li><a href="global.html#OLLAMA_CONFIG">OLLAMA_CONFIG</a></li><li><a href="global.html#SCHEMA_DESCRIPCION">SCHEMA_DESCRIPCION</a></li><li><a href="global.html#crearApp">crearApp</a></li><li><a href="global.html#express">express</a></li><li><a href="global.html#https">https</a></li><li><a href="global.html#prepararDatosParaGrafico">prepararDatosParaGrafico</a></li><li><a href="global.html#validarSQL">validarSQL</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Wed Dec 17 2025 11:14:43 GMT+0100 (hora estándar de Europa central)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

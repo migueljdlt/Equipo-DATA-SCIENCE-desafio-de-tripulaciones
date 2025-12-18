@@ -1,0 +1,182 @@
+/**
+ * Constantes de configuración
+ */
+
+const SCHEMA_DESCRIPCION = `
+SCHEMA DE LA BASE DE DATOS:
+
+Tabla: employees (empleados)
+  - employee_id (PK)
+  - first_name (nombre)
+  - last_name (apellido)
+  - email
+  - position (puesto)
+  - department (departamento)
+  - salary (salario)
+
+Tabla: customers (clientes)
+  - customer_id (PK)
+  - first_name_customer (nombre)
+  - last_name_customer (apellido)
+  - email
+  - region
+
+Tabla: products (productos)
+  - product_id (PK)
+  - product_name (nombre del producto)
+  - category (categoria)
+  - unit_price (precio unitario)
+
+Tabla: sales (ventas)
+  - sale_id (PK)
+  - employee_id (FK -> employees)
+  - customer_id (FK -> customers)
+  - product_id (FK -> products)
+  - sales_channel (canal: online, tienda, etc)
+  - quantity (cantidad)
+  - discount_percentage (porcentaje descuento)
+  - payment_method (metodo pago)
+  - subtotal
+  - discount_amount (cantidad descontada)
+  - total
+  - sale_timestamp (fecha y hora de la venta)
+
+Tabla: users (usuarios del sistema)
+  - Para autenticacion, no usar en queries de negocio
+
+RELACIONES:
+- sales.employee_id -> employees.employee_id (que empleado hizo la venta)
+- sales.customer_id -> customers.customer_id (a que cliente)
+- sales.product_id -> products.product_id (que producto)
+`;
+
+const GLOSARIO = `
+GLOSARIO:
+- ventas totales = SUM(total)
+- ventas por empleado = JOIN sales con employees, GROUP BY employee
+- ventas por producto = JOIN sales con products, GROUP BY product
+- ventas por cliente = JOIN sales con customers, GROUP BY customer
+- ventas por region = JOIN sales con customers, GROUP BY region
+- ventas por mes = EXTRACT(MONTH FROM sale_timestamp)
+- ventas por canal = GROUP BY sales_channel
+- top empleados = ORDER BY SUM(total) DESC
+- top productos = ORDER BY SUM(quantity) DESC o SUM(total) DESC
+- nombre completo empleado = CONCAT(first_name, ' ', last_name)
+- nombre completo cliente = CONCAT(first_name_customer, ' ', last_name_customer)
+`;
+
+const GLOSARIO_MATEMATICO = `
+OPERACIONES MATEMÁTICAS:
+
+PORCENTAJES:
+- "X% de las ventas" -> SUM(total) * (X/100)
+- "aumentar X%" -> valor * (1 + X/100)
+- "reducir X%" -> valor * (1 - X/100)
+- "participación porcentual" -> (valor / SUM(total)) * 100
+
+PROMEDIOS:
+- "promedio" -> AVG(total)
+- "ticket promedio" -> AVG(total)
+- "mayor que el promedio" -> WHERE total > (SELECT AVG(total) FROM sales)
+
+COMPARACIONES:
+- "top X%" -> usa PERCENTILE_CONT
+- "más de X" -> WHERE campo > X
+- "entre X y Y" -> WHERE campo BETWEEN X AND Y
+
+VARIACIONES:
+- "crecimiento" -> (valor_actual - valor_anterior)
+- "crecimiento porcentual" -> ((valor_actual - valor_anterior) / valor_anterior) * 100
+- "variación interanual" -> comparación YEAR(fecha)
+- "mes contra mes" -> comparación MONTH(fecha)
+- "incremento absoluto" -> valor_actual - valor_anterior
+- "caída / descenso" -> valor_anterior - valor_actual
+
+ACUMULADOS:
+- "acumulado" -> SUM(total) OVER (ORDER BY fecha)
+- "acumulado mensual" -> SUM(total) OVER (PARTITION BY mes ORDER BY fecha)
+- "acumulado anual" -> SUM(total) OVER (PARTITION BY anio ORDER BY fecha)
+
+DISPERSIÓN:
+- "desviación estándar" -> STDDEV(total)
+- "varianza" -> VARIANCE(total)
+- "valor mínimo" -> MIN(total)
+- "valor máximo" -> MAX(total)
+- "rango" -> MAX(total) - MIN(total)
+
+RANKING:
+- "top N" -> ORDER BY total DESC LIMIT N
+- "peor N" -> ORDER BY total ASC LIMIT N
+- "ranking" -> RANK() OVER (ORDER BY total DESC)
+- "posición" -> ROW_NUMBER() OVER (ORDER BY total DESC)
+
+TIEMPO:
+- "últimos X días" -> fecha >= CURRENT_DATE - INTERVAL 'X days'
+- "últimos X meses" -> fecha >= CURRENT_DATE - INTERVAL 'X months'
+- "año actual" -> YEAR(fecha) = YEAR(CURRENT_DATE)
+- "mes actual" -> MONTH(fecha) = MONTH(CURRENT_DATE)
+- "mismo periodo del año anterior" -> fecha BETWEEN ... (shift -1 year)
+
+PROPORCIONES:
+- "peso relativo" -> valor / SUM(valor)
+- "cuota de mercado" -> SUM(valor) / (SELECT SUM(valor) FROM ...)
+- "distribución porcentual" -> SUM(valor) / SUM(SUM(valor)) OVER ()
+
+CONDICIONES:
+- "sin descuento" -> descuento = 0
+- "con descuento" -> descuento > 0
+- "ventas grandes" -> total > (SELECT AVG(total) FROM sales)
+- "clientes frecuentes" -> COUNT(*) > X
+
+COMPARATIVAS:
+- "mejor que" -> >
+- "peor que" -> 
+- "igual que" -> =
+- "diferencia entre" -> ABS(valor_a - valor_b)
+
+SINÓNIMOS:
+- "facturación" -> ventas
+- "ingresos" -> ventas
+- "importe" -> total
+- "ganancias" -> total
+- "sueldo" -> salario
+
+EJEMPLOS:
+- "5% de ventas totales" -> SELECT SUM(total) * 0.05 FROM sales;
+- "comisión 3% por empleado" -> SELECT empleado, SUM(total) * 0.03 AS comision FROM ...
+- "ventas mayores al promedio" -> SELECT * FROM sales WHERE total > (SELECT AVG(total) FROM sales);
+- "crecimiento mensual de ventas" -> SELECT (SUM(total) - LAG(SUM(total))) OVER (ORDER BY mes) FROM sales;
+- "ventas acumuladas del año" -> SELECT fecha, SUM(total) OVER (ORDER BY fecha) FROM sales;
+- "ranking de empleados por ventas" -> SELECT empleado, RANK() OVER (ORDER BY SUM(total) DESC) FROM sales GROUP BY empleado;
+- "ventas del mes actual"  -> SELECT SUM(total) FROM sales WHERE DATE_TRUNC('month', fecha) = DATE_TRUNC('month', CURRENT_DATE);
+- "porcentaje de ventas con descuento" -> SELECT (SUM(total) / (SELECT SUM(total) FROM sales)) * 100 FROM sales WHERE descuento_monto > 0;
+- "promedio de ventas por región" -> SELECT region, AVG(total) AS promedio_ventas FROM sales GROUP BY region;
+- "top 3 productos por ingresos" -> SELECT producto_id, SUM(total) AS ingresos FROM sales GROUP BY producto_id ORDER BY ingresos DESC LIMIT 3;
+- "variación interanual de ventas" -> SELECT anio, SUM(total) - LAG(SUM(total)) OVER (ORDER BY anio) AS variacion FROM sales GROUP BY anio;
+`;
+
+const PALABRAS_GRAFICO = [
+    'grafico', 'gráfico', 'grafica', 'gráfica', 'chart', 'visualiza', 'dibuja',
+    'diagrama', 'plot', 'barras', 'lineas', 'pastel', 'pie', 'columnas', 'tarta'
+];
+
+const TIPOS_GRAFICO = {
+    'barras': 'bar', 'barra': 'bar', 'bar': 'bar', 'horizontal': 'bar',
+    'columnas': 'column', 'columna': 'column', 'column': 'column', 'vertical': 'column',
+    'lineas': 'line', 'linea': 'line', 'line': 'line', 'tendencia': 'line', 'evolucion': 'line',
+    'pastel': 'pie', 'pie': 'pie', 'circular': 'pie', 'tarta': 'pie', 'torta': 'pie', 'porcentaje': 'pie'
+};
+
+const TIPOS_PERMITIDOS = ['bar', 'column', 'line', 'pie'];
+
+const EJEMPLOS_APRENDIDOS = [];
+
+module.exports = {
+    SCHEMA_DESCRIPCION,
+    GLOSARIO,
+    GLOSARIO_MATEMATICO,
+    PALABRAS_GRAFICO,
+    TIPOS_GRAFICO,
+    TIPOS_PERMITIDOS,
+    EJEMPLOS_APRENDIDOS
+};
